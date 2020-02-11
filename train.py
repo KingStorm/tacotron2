@@ -38,7 +38,7 @@ from torch.utils.data import DataLoader
 
 import torch.distributed as dist
 
-#from apex.parallel import DistributedDataParallel as DDP
+from apex.parallel import DistributedDataParallel as DDP
 
 from tacotron2.loader import parse_tacotron2_args
 from tacotron2.loader import get_tacotron2_model
@@ -52,9 +52,9 @@ from dllogger import tags
 from dllogger.autologging import log_hardware, log_args
 from scipy.io.wavfile import write as write_wav
 
-# from apex import amp
-# amp.lists.functional_overrides.FP32_FUNCS.remove('softmax')
-# amp.lists.functional_overrides.FP16_FUNCS.append('softmax')
+from apex import amp
+amp.lists.functional_overrides.FP32_FUNCS.remove('softmax')
+amp.lists.functional_overrides.FP16_FUNCS.append('softmax')
 
 
 def parse_args(parser):
@@ -87,7 +87,7 @@ def parse_args(parser):
     optimization.add_argument('--final-lr', '--final-learning-rate', default=1e-5, type=float, required=True, help='Final earing rate')
     optimization.add_argument('--weight-decay', default=1e-6, type=float, help='Weight decay')
     optimization.add_argument('--grad-clip-thresh', default=1.0, type=float, help='Clip threshold for gradients')
-    optimization.add_argument('-bs', '--batch-size', default=32, type=int, required=True, help='Batch size per GPU')
+    optimization.add_argument('-bs', '--batch-size', default=40, type=int, required=True, help='Batch size per GPU')
 
     # dataset parameters
     dataset = parser.add_argument_group('dataset parameters')
@@ -259,7 +259,7 @@ def main():
 
     collate_fn = TextMelCollate(args)
     train_dataset = TextMelDataset(args, args.training_anchor_dirs)
-    train_loader = DataLoader(train_dataset, num_workers=2, shuffle=False,
+    train_loader = DataLoader(train_dataset, num_workers=8, shuffle=False,
                               batch_size=args.batch_size//len(args.training_anchor_dirs),
                               pin_memory=False, drop_last=True, collate_fn=collate_fn)
     # valate_dataset = TextMelDataset(args, args.validation_anchor_dirs)

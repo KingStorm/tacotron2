@@ -439,7 +439,6 @@ class Tacotron2(nn.Module):
                  postnet_embedding_dim, postnet_kernel_size,
                  postnet_n_convolutions):
         super(Tacotron2, self).__init__()
-        self.elapsed_epochs = nn.Parameter(torch.zeros(1).long(), requires_grad=False)
         self.mask_padding = mask_padding
         self.n_mel_channels = n_mel_channels
         self.n_frames_per_step = n_frames_per_step
@@ -498,7 +497,7 @@ class Tacotron2(nn.Module):
         self.elapsed_epochs += 1
 
     def get_elapsed_epochs(self):
-        return self.elapsed_epochs.data.item()
+        return self.elapsed_epochs
 
     def restore_checkpoint(self, filepath):
         if os.path.exists(filepath) :
@@ -530,10 +529,13 @@ class Tacotron2(nn.Module):
                 return new_state_dict
 
             print(f'\nLoading Weights: "{filepath}"')
-            state_dict = torch.load(filepath)
-            if _checkpoint_from_distributed(state_dict):
-                state_dict = _unwrap_distributed(state_dict)
-            self.load_state_dict(state_dict)
+            checkpoint = torch.load(filepath)
+            self.elapsed_epochs = checkpoint['epoch']
+            if _checkpoint_from_distributed(checkpoint['model']):
+                checkpoint['model'] = _unwrap_distributed(checkpoint['model'])
+            self.load_state_dict(checkpoint['model'])
         else:
             print('\nNew Tacotron2 Training Session...')
-            torch.save(self.state_dict(), filepath)
+            self.elapsed_epochs = 0
+            torch.save({'epoch': self.elapsed_epochs,
+                        'model': self.state_dict()}, filepath)

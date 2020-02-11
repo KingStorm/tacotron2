@@ -31,7 +31,7 @@ import os
 import sys
 import time
 import torch
-# from apex import amp
+from apex import amp
 from scipy.io.wavfile import write
 from tacotron2.data_function import to_gpu
 from tacotron2.loader import parse_tacotron2_args
