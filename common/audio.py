@@ -14,19 +14,6 @@ def float_2_label(x, bits) :
 	x = (x + 1.) * (2**bits - 1) / 2
 	return x.clip(0, 2**bits - 1)
 
-def encode_mu_law(x, mu) :
-	mu = mu - 1
-	fx = np.sign(x) * np.log(1 + mu * np.abs(x)) / np.log(1 + mu)
-	return np.floor((fx + 1) / 2 * mu + 0.5)
-
-def decode_mu_law(y, mu, from_labels=False) :
-	# TODO : get rid of log2 - makes no sense
-	import math
-	if from_labels : y = label_2_float(y, math.log2(mu))
-	mu = mu - 1
-	x = np.sign(y) / mu * ((1 + mu) ** np.abs(y) - 1)
-	return x
-
 def dc_notch_filter(wav):
 	# code from speex
 	notch_radius = 0.982
