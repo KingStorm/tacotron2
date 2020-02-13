@@ -77,8 +77,9 @@ def parse_args(parser):
     training.add_argument('--seed', type=int, default=1234, help='Seed for PyTorch random number generators')
     training.add_argument('--dynamic-loss-scaling', type=bool, default=True, help='Enable dynamic loss scaling')
     training.add_argument('--amp-run', action='store_true', help='Enable AMP')
-    training.add_argument('--cudnn-enabled', default=True, help='Enable cudnn')
-    training.add_argument('--cudnn-benchmark', default=True, help='Run cudnn benchmark')
+    training.add_argument('--amp-level', type=str, default='O0', help='AMP option level')
+    training.add_argument('--cudnn-enabled', type=bool, default=True, help='Enable cudnn')
+    training.add_argument('--cudnn-benchmark', type=bool, default=True, help='Run cudnn benchmark')
     training.add_argument('--disable-uniform-initialize-bn-weight', action='store_true', help='disable uniform initialization of batchnorm layer weight')
 
     optimization = parser.add_argument_group('optimization setup')
@@ -251,7 +252,7 @@ def main():
     optimizer = torch.optim.Adam(model.parameters(), lr=args.init_lr, weight_decay=args.weight_decay)
 
     if args.amp_run:
-        model, optimizer = amp.initialize(model, optimizer, opt_level="O1")
+        model, optimizer = amp.initialize(model, optimizer, opt_level=args.amp_level)
         if distributed_run:
             model = DDP(model)
 
@@ -375,7 +376,7 @@ def main():
         if epoch % args.epochs_per_checkpoint == 0 and args.rank == 0:
             checkpoint_path = os.path.join(args.output_directory, f"checkpoint_{epoch:04d}.pt")
             print(f"Saving model and optimizer state at epoch {epoch:04d} to {checkpoint_path}")
-            torch.save(model.state_dict(), checkpoint_path)
+            model.restore_checkpoint(checkpoint_path)
 
             # Save evaluation
             # save_sample(model, args.tacotron2_checkpoint, args.phrase_path,

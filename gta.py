@@ -55,6 +55,7 @@ def parse_args(parser):
     parser.add_argument('--anchor-dirs', default=['ljs_mel_text_train_filelist.txt'], type=str, nargs='*', help='Multi-speaker corpus directory')
     parser.add_argument('--text-cleaners', nargs='*', default=['basic_cleaners'], type=str, help='Type of text cleaners for input text')
     parser.add_argument('--amp-run', action='store_true', help='inference with AMP')
+    parser.add_argument('--amp-level', type=str, default='O0', help='AMP option level')
     parser.add_argument('--log-file', type=str, default='nvlog.json', help='Filename for logging')
     parser.add_argument('--include-warmup', action='store_true', help='Include warmup')
     parser.add_argument('--hop-length', type=int, default=256, help='STFT hop length for estimating audio length from mel size')
@@ -79,7 +80,7 @@ def load_and_setup_model(parser, args):
     model.eval()
 
     if args.amp_run:
-        model, _ = amp.initialize(model, [], opt_level="O3")
+        model, _ = amp.initialize(model, [], opt_level=args.amp_level)
 
     return model
 

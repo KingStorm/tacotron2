@@ -57,7 +57,7 @@ def parse_tacotron2_args(parent, add_help=False):
 
     # decoder parameters
     decoder = parser.add_argument_group('decoder parameters')
-    decoder.add_argument('--n-frames-per-step', default=2, type=int, help='Number of frames processed per step')
+    decoder.add_argument('--n-frames-per-step', default=3, type=int, help='Number of frames processed per step')
     decoder.add_argument('--decoder-rnn-dim', default=1024, type=int, help='Number of units in decoder LSTM')
     decoder.add_argument('--decoder-n-lstms', default=2, type=int, help='Number of decoder LSTM layers')
     decoder.add_argument('--prenet-dim', default=256, type=int, help='Number of ReLU units in prenet layers')

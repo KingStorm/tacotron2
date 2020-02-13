@@ -53,6 +53,7 @@ def parse_args(parser):
     parser.add_argument('-sn', '--speaker-num', default=1, type=int, help='Speaker number')
     parser.add_argument('-sr', '--sampling-rate', default=22050, type=int, help='Sampling rate')
     parser.add_argument('--amp-run', action='store_true', help='inference with AMP')
+    parser.add_argument('--amp-level', type=str, default='O0', help='AMP option level')
     parser.add_argument('--log-file', type=str, default='nvlog.json', help='Filename for logging')
     parser.add_argument('--include-warmup', action='store_true', help='Include warmup')
 
@@ -75,7 +76,7 @@ def load_and_setup_model(parser, args):
     model.eval()
 
     if args.amp_run:
-        model, _ = amp.initialize(model, [], opt_level="O3")
+        model, _ = amp.initialize(model, [], opt_level=args.amp_level)
 
     return model
 
